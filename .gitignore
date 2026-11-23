@@ -1,0 +1,9 @@
+build/
+runs/
+data/
+results/
+tests/data/*.bin
+__pycache__/
+*.pyc
+*.npy
+*.nsys-rep
