@@ -79,8 +79,8 @@ int main(int argc, char** argv) {
         printf("batch %d per block = %d replicas x %d micro x %d accumulation, %d steps\n", batch, D, micro, tr.accum, steps);
     }
     char path[1024];
-    snprintf(path, sizeof(path), "mkdir -p '%s'", out);
-    if (root && system(path) != 0) fprintf(stderr, "warning: could not create %s\n", out);
+    snprintf(path, sizeof(path), "mkdir -p '%s'", out);  // on every rank: machines may not share a disk
+    if (system(path) != 0 && root) fprintf(stderr, "warning: could not create %s\n", out);
     comm_barrier_world(&comm);
     FILE* log = NULL;
     if (root) {
@@ -121,7 +121,7 @@ int main(int argc, char** argv) {
             int final = step + 1 == steps;
             if (!final) {
                 snprintf(path, sizeof(path), "mkdir -p '%s/step%d'", out, step + 1);
-                if (root && system(path) != 0) fprintf(stderr, "warning: could not create a snapshot directory\n");
+                if (system(path) != 0 && root) fprintf(stderr, "warning: could not create a snapshot directory\n");
                 comm_barrier_world(&comm);
             }
             if (comm.replica == 0)

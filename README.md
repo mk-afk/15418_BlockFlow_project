@@ -29,6 +29,12 @@ Multi-GPU is one MPI rank per GPU:
     mpirun -np 2 --host ghc41,ghc42 ./build/gpu/train --data data/cifar10_train.bin --blocks 2   # two machines
     mpirun -np 4 ./build/gpu/train --data data/cifar10_train.bin --blocks 2 --replicas 2         # one 4-GPU node
 
+GHC asks for a password on every ssh, which mpirun can't answer. Log in once over a shared connection
+and point mpirun at it:
+
+    ssh -M -S /tmp/$USER/cm -fN ghc42
+    export OMPI_MCA_plm_rsh_args="-S /tmp/$USER/cm"
+
 Options: `--blocks`, `--replicas`, `--batch` (per block, 512), `--micro` (per GPU, 32), `--steps`, `--out`.
 Everything else is a constant at the top of `csrc/trainer.cuh`.
 
