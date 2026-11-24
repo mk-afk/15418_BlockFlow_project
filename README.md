@@ -11,8 +11,11 @@ train independently, each on its own range of timesteps, with D data-parallel re
     make test-gpu    # needs python3 with torch to make the test data
     make test        # same tests on the CPU, no GPU needed
 
-The defaults are for the GHC machines: sm_75, MPI all-reduce, micro-batch 64 (fits in 8 GB).
-On NCSA use `make gpu GPU_ARCH=sm_80 USE_NCCL=1`.
+The defaults are for the GHC machines (RTX 2080, CUDA 11.7): sm_75, MPI all-reduce, micro-batch 32,
+and g++-11 as nvcc's host compiler because CUDA 11 cannot use GCC 13. On GHC work in `/tmp/$USER`;
+the AFS quota is too small for the data and checkpoints. `make testdata` needs torch, so run it on
+another machine and copy `tests/data/` over if GHC has none.
+On NCSA use `make gpu GPU_ARCH=sm_80 USE_NCCL=1` and `--micro 128`.
 
 ## Run
 
@@ -26,7 +29,7 @@ Multi-GPU is one MPI rank per GPU:
     mpirun -np 2 --host ghc41,ghc42 ./build/gpu/train --data data/cifar10_train.bin --blocks 2   # two machines
     mpirun -np 4 ./build/gpu/train --data data/cifar10_train.bin --blocks 2 --replicas 2         # one 4-GPU node
 
-Options: `--blocks`, `--replicas`, `--batch` (per block, 512), `--micro` (per GPU, 64), `--steps`, `--out`.
+Options: `--blocks`, `--replicas`, `--batch` (per block, 512), `--micro` (per GPU, 32), `--steps`, `--out`.
 Everything else is a constant at the top of `csrc/trainer.cuh`.
 
 ## Scripts

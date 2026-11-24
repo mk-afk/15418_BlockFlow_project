@@ -9,6 +9,7 @@
 # checkpoints in runs/ (not in git).
 set -euo pipefail
 cd "$(dirname "$0")/.."
+export HWLOC_COMPONENTS=-gl  # stops Open MPI's "Authorization required" lines about the X display
 COMMON="--data data/mnist_train.bin --batch 128 --micro 32 --steps 3000 ${ARGS:-}"
 make gpu
 for run in ${@:-c_e2e c_b2 pytorch grids}; do

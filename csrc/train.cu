@@ -6,8 +6,8 @@
 //   mpirun -np 4 ./train --data data/cifar10_train.bin --blocks 2 --replicas 2   4 GPUs: 2 blocks x 2 replicas
 //
 // Options: --blocks B (1), --replicas D (ranks / B), --batch images per block per step (512),
-//          --micro images per GPU per micro-batch (64: the full model then needs 5.5 GB of activations,
-//          which fits an 8 GB GPU), --steps (1000), --out DIR (runs/default).
+//          --micro images per GPU per micro-batch (32: the full model then uses 3.8 GB of an 8 GB GPU),
+//          --steps (1000), --out DIR (runs/default).
 // Writes <out>/block<b>.bin at the end and <out>/step<S>/block<b>.bin every SNAPSHOT_EVERY steps
 // (readable by python/blockflow/ckpt.py), <out>/log.jsonl, and <out>/summary.json with the layout,
 // parameter count, all-reduce volume and per-phase time per step.
@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
     comm_init(&comm, &argc, &argv);
     const int root = comm.world_rank == 0;
     const char *data_path = NULL, *out = "runs/default";
-    int B = 1, D = -1, batch = 512, micro = 64, steps = 1000;
+    int B = 1, D = -1, batch = 512, micro = 32, steps = 1000;
     for (int i = 1; i < argc; i += 2) {
         const char* k = argv[i];
         const char* v = i + 1 < argc ? argv[i + 1] : "";
@@ -44,7 +44,7 @@ int main(int argc, char** argv) {
         }
     }
     if (!data_path) {
-        if (root) fprintf(stderr, "usage: train --data FILE [--blocks 1 --replicas P/B --batch 512 --micro 64 --steps 1000 --out DIR]\n");
+        if (root) fprintf(stderr, "usage: train --data FILE [--blocks 1 --replicas P/B --batch 512 --micro 32 --steps 1000 --out DIR]\n");
         return 1;
     }
     if (D < 0) D = comm.world_size >= B ? comm.world_size / B : 1;

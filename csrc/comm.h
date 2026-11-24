@@ -12,6 +12,8 @@
 #pragma once
 #include "common.h"
 #ifdef USE_MPI
+#define OMPI_SKIP_MPICXX 1  // only the C interface is used; the C++ bindings pull in headers old nvcc cannot read
+#define MPICH_SKIP_MPICXX 1
 #include <mpi.h>
 #include <unistd.h>
 #endif

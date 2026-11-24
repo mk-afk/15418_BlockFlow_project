@@ -6,7 +6,7 @@
 // shape (N, H, W, C) for python/fid_eval.py and prints which block runs each Euler step.
 #include "dit.cuh"
 
-#define SAMPLE_BATCH 64  // the activation buffers hold a full training batch: 64 DiT-S/2 images need about 5.5 GB
+#define SAMPLE_BATCH 32  // the activation buffers are the training ones: 32 DiT-S/2 images need 2.8 GB
 #define SAMPLE_SEED 0ULL
 
 static void write_npy_u8(const char* path, const unsigned char* data, int N, int H, int W, int C) {

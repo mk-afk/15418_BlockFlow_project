@@ -231,7 +231,13 @@ static void acts_alloc(Acts* a, const DiTConfig* cfg_in, int N) {
     static_assert(sizeof(ptrs) / sizeof(ptrs[0]) == sizeof(sizes) / sizeof(sizes[0]), "acts table mismatch");
     size_t total = 0;
     for (int i = 0; i < nbuf; i++) total += (sizes[i] + 63) & ~(size_t)63;  // 256-byte aligned sub-buffers
-    cudaCheck(cudaMalloc(&a->mem, total * sizeof(float)));
+    if (cudaMalloc(&a->mem, total * sizeof(float)) != cudaSuccess) {
+        size_t free_b = 0, total_b = 0;
+        cudaMemGetInfo(&free_b, &total_b);
+        fprintf(stderr, "a batch of %d needs %.2f GB of activations but the GPU has %.2f of %.2f GB free: use a smaller --micro\n", N,
+                total * sizeof(float) / 1e9, free_b / 1e9, total_b / 1e9);
+        exit(EXIT_FAILURE);
+    }
     a->mem_floats = total;
     float* p = a->mem;
     for (int i = 0; i < nbuf; i++) {
